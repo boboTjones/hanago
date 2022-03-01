@@ -1,6 +1,7 @@
 package resolve
 
 import (
+	"fmt"
 	"net"
 	"testing"
 
@@ -8,22 +9,33 @@ import (
 )
 
 func TestResolve(t *testing.T) {
-	fqdn := "www.sockpuppet.org."
-	res, _ := Resolve(fqdn, "8.8.8.8:53")
+	fqdn := "assets.98point6.com."
 	var T []net.IP
 
-	assert.Equal(t, fqdn, res.Host)
-	if len(res.Answers) > 0 && res.Answers[0].Type == "A" {
-		assert.IsType(t, T, res.Answers[0].IPs)
+	res, err := Resolve(fqdn, "8.8.8.8:53")
+	if err != nil {
+		//XXX ToDo(erin): haven't had an error yet so print it for now.
+		fmt.Println(err)
+	}
+
+	for _, rec := range res.Records {
+		fmt.Println(rec)
+	}
+
+	assert.Equal(t, fqdn, res.Original)
+	if len(res.Records) > 0 && res.Records[0].Type == "A" {
+		assert.IsType(t, T, res.Records[0].IPs)
 	}
 }
 
 func TestIsWildcard(t *testing.T) {
-	yes, _ := IsWildCard("sockpuppet.org", "8.8.8.8:53")
-	assert.False(t, yes)
+	yes, _ := IsWildCard("sockpuppet.org.", "8.8.8.8:53")
+	assert.True(t, yes)
 
-	// XXX ToDo(erin): find a site with wildcard DNS for testing.
-	//yes, _ = IsWildCard("sockpuppet.org", "8.8.8.8:53")
-	//assert.True(t, yes)
+}
 
+func TestBrute(t *testing.T) {
+	wl := []string{"bystander", "bystreet", "byth", "bytime", "bytownite", "bytownitite", "bywalk", "bywalker", "byway", "bywoner", "byword", "bywork"}
+
+	_ = Brute("sockpuppet.org", "8.8.8.8:53", wl)
 }
